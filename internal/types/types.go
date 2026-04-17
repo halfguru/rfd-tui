@@ -37,13 +37,13 @@ type Votes struct {
 }
 
 type Offer struct {
-	CategoryID  int    `json:"category_id"`
-	DealerName  string `json:"dealer_name"`
-	URL         string `json:"url"`
-	Price       string `json:"price"`
-	OrigPrice   string `json:"original_price"`
-	SaleInfo    string `json:"sale_info"`
-	Savings     string `json:"savings"`
+	CategoryID int    `json:"category_id"`
+	DealerName string `json:"dealer_name"`
+	URL        string `json:"url"`
+	Price      string `json:"price"`
+	OrigPrice  string `json:"original_price"`
+	SaleInfo   string `json:"sale_info"`
+	Savings    string `json:"savings"`
 }
 
 type PostsResponse struct {
@@ -52,16 +52,14 @@ type PostsResponse struct {
 }
 
 type Post struct {
-	PostID    int       `json:"post_id"`
-	TopicID   int       `json:"topic_id"`
-	Body      string    `json:"body"`
-	PostTime  time.Time `json:"post_time"`
-	Author    Author    `json:"author"`
-	Votes     PostVotes `json:"votes"`
-}
-
-type Author struct {
-	Username string `json:"username"`
+	PostID   int       `json:"post_id"`
+	TopicID  int       `json:"topic_id"`
+	AuthorID int       `json:"author_id"`
+	Number   int       `json:"number"`
+	Body     string    `json:"body"`
+	PostTime time.Time `json:"post_time"`
+	Title    string    `json:"title"`
+	Votes    PostVotes `json:"votes"`
 }
 
 type PostVotes struct {

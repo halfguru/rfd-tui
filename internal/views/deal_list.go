@@ -5,24 +5,23 @@ import (
 	"strings"
 	"time"
 
+	"charm.land/bubbles/v2/spinner"
+	tea "charm.land/bubbletea/v2"
 	"github.com/simon/rfd/internal/client"
 	"github.com/simon/rfd/internal/styles"
 	"github.com/simon/rfd/internal/types"
-	tea "charm.land/bubbletea/v2"
-	"charm.land/bubbles/v2/spinner"
-
 )
 
 type DealListModel struct {
-	topics    []types.Topic
-	cursor    int
-	page      int
-	loading   bool
-	err       error
-	spinner   spinner.Model
-	width     int
-	height    int
-	client    *client.Client
+	topics  []types.Topic
+	cursor  int
+	page    int
+	loading bool
+	err     error
+	spinner spinner.Model
+	width   int
+	height  int
+	client  *client.Client
 }
 
 func NewDealList(c *client.Client) DealListModel {
