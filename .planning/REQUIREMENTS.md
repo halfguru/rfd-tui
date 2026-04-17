@@ -83,34 +83,34 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| API-01 | — | Pending |
-| API-02 | — | Pending |
-| API-03 | — | Pending |
-| API-04 | — | Pending |
-| LIST-01 | — | Pending |
-| LIST-02 | — | Pending |
-| LIST-03 | — | Pending |
-| LIST-04 | — | Pending |
-| LIST-05 | — | Pending |
-| THRD-01 | — | Pending |
-| THRD-02 | — | Pending |
-| THRD-03 | — | Pending |
-| THRD-04 | — | Pending |
-| BROW-01 | — | Pending |
-| BROW-02 | — | Pending |
-| SRCH-01 | — | Pending |
-| SRCH-02 | — | Pending |
-| SRCH-03 | — | Pending |
-| SRCH-04 | — | Pending |
-| SRCH-05 | — | Pending |
-| UX-01 | — | Pending |
-| UX-02 | — | Pending |
+| API-01 | Phase 1 | Pending |
+| API-02 | Phase 2 | Pending |
+| API-03 | Phase 1 | Pending |
+| API-04 | Phase 1 | Pending |
+| LIST-01 | Phase 1 | Pending |
+| LIST-02 | Phase 1 | Pending |
+| LIST-03 | Phase 1 | Pending |
+| LIST-04 | Phase 1 | Pending |
+| LIST-05 | Phase 1 | Pending |
+| THRD-01 | Phase 2 | Pending |
+| THRD-02 | Phase 2 | Pending |
+| THRD-03 | Phase 2 | Pending |
+| THRD-04 | Phase 2 | Pending |
+| BROW-01 | Phase 2 | Pending |
+| BROW-02 | Phase 2 | Pending |
+| SRCH-01 | Phase 3 | Pending |
+| SRCH-02 | Phase 3 | Pending |
+| SRCH-03 | Phase 3 | Pending |
+| SRCH-04 | Phase 3 | Pending |
+| SRCH-05 | Phase 3 | Pending |
+| UX-01 | Phase 3 | Pending |
+| UX-02 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Mapped to phases: 0
-- Unmapped: 22 ⚠️
+- Mapped to phases: 22
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after initial definition*
+*Last updated: 2026-04-17 after roadmap creation*
