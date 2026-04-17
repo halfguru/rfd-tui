@@ -18,7 +18,7 @@ A terminal UI for browsing RedFlagDeals.com hot deals, built with Go + Bubble Te
 ## Build & Run
 
 ```bash
-go build -o rfd ./cmd/rfd
+go build -o rfd .
 ./rfd
 ```
 
