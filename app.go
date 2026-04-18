@@ -21,6 +21,8 @@ type Model struct {
 	activeView activeView
 	dealList   views.DealListModel
 	thread     views.ThreadModel
+	help       views.HelpModel
+	showHelp   bool
 	client     *client.Client
 	width      int
 	height     int
@@ -44,11 +46,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+	}
 
+	if m.showHelp {
+		return m.updateHelp(msg)
+	}
+
+	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "?":
+			m.showHelp = true
+			viewName := "Deal List"
+			if m.activeView == viewThread {
+				viewName = "Thread"
+			}
+			m.help = views.NewHelp(viewName)
+			return m, nil
 		case "q":
 			if m.activeView == viewDealList {
 				return m, tea.Quit
@@ -56,7 +72,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.activeView = viewDealList
 			m.thread = views.ThreadModel{}
 			return m, nil
-		case "escape":
+		case "esc":
 			if m.activeView == viewThread {
 				m.activeView = viewDealList
 				m.thread = views.ThreadModel{}
@@ -67,7 +83,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.activeView == viewDealList {
 				if t := m.dealList.SelectedTopic(); t != nil {
 					m.activeView = viewThread
-					m.thread = views.NewThread(t, m.client)
+					m.thread = views.NewThread(t, m.client, m.width, m.height)
 					return m, m.thread.Init()
 				}
 				return m, nil
@@ -91,15 +107,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+func (m Model) updateHelp(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg.(type) {
+	case tea.KeyPressMsg:
+		m.showHelp = false
+		return m, nil
+	}
+	return m, nil
+}
+
 func (m Model) View() tea.View {
+	var v tea.View
 	switch m.activeView {
 	case viewDealList:
-		return m.dealList.View()
+		v = m.dealList.View()
 	case viewThread:
-		return m.thread.View()
+		v = m.thread.View()
 	default:
-		return tea.NewView("")
+		v = tea.NewView("")
 	}
+
+	if m.showHelp {
+		return m.help.View()
+	}
+	return v
 }
 
 func openBrowser(url string) tea.Cmd {

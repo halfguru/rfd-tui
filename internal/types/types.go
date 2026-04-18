@@ -52,14 +52,24 @@ type PostsResponse struct {
 }
 
 type Post struct {
-	PostID   int       `json:"post_id"`
-	TopicID  int       `json:"topic_id"`
-	AuthorID int       `json:"author_id"`
-	Number   int       `json:"number"`
-	Body     string    `json:"body"`
-	PostTime time.Time `json:"post_time"`
-	Title    string    `json:"title"`
-	Votes    PostVotes `json:"votes"`
+	PostID    int       `json:"post_id"`
+	TopicID   int       `json:"topic_id"`
+	AuthorID  int       `json:"author_id"`
+	Number    int       `json:"number"`
+	Body      string    `json:"body"`
+	PostTime  time.Time `json:"post_time"`
+	Title     string    `json:"title"`
+	Votes     PostVotes `json:"votes"`
+	AuthorName string
+}
+
+type UserResponse struct {
+	User User `json:"user"`
+}
+
+type User struct {
+	UserID   int    `json:"user_id"`
+	Username string `json:"username"`
 }
 
 type PostVotes struct {
@@ -93,4 +103,31 @@ func (t *Topic) Savings() string {
 		return ""
 	}
 	return t.Offer.Savings
+}
+
+var categoryNames = map[int]string{
+	9:  "Computers & Electronics",
+	10: "Home & Garden",
+	11: "Automotive",
+	12: "Food & Drink",
+	13: "Entertainment",
+	14: "Fashion & Apparel",
+	15: "Travel",
+	16: "Finance",
+	17: "Phones & Telecom",
+}
+
+func (t *Topic) CategoryID() int {
+	if t.Offer == nil {
+		return 0
+	}
+	return t.Offer.CategoryID
+}
+
+func (t *Topic) CategoryName() string {
+	id := t.CategoryID()
+	if name, ok := categoryNames[id]; ok {
+		return name
+	}
+	return ""
 }
