@@ -28,12 +28,16 @@ type ThreadModel struct {
 	client     *client.Client
 }
 
-func NewThread(topic *types.Topic, c *client.Client) ThreadModel {
+func NewThread(topic *types.Topic, c *client.Client, w, h int) ThreadModel {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = styles.LoadingStyle
 
 	vp := viewport.New()
+	vp.SetWidth(w)
+	if h > 3 {
+		vp.SetHeight(h - 3)
+	}
 
 	return ThreadModel{
 		topic:    topic,
@@ -42,6 +46,8 @@ func NewThread(topic *types.Topic, c *client.Client) ThreadModel {
 		spinner:  s,
 		viewport: vp,
 		loading:  true,
+		width:    w,
+		height:   h,
 	}
 }
 
@@ -59,6 +65,31 @@ func (m ThreadModel) Update(msg tea.Msg) (ThreadModel, tea.Cmd) {
 		m.err = nil
 		m.viewport.SetContent(m.renderPosts())
 		m.viewport.GotoTop()
+		cmds := []tea.Cmd{}
+		for _, p := range msg.Posts {
+			if m.client.CachedUsername(p.AuthorID) == fmt.Sprintf("user_%d", p.AuthorID) {
+				cmds = append(cmds, m.client.FetchUsername(p.AuthorID))
+			} else {
+				for i := range m.posts {
+					if m.posts[i].AuthorID == p.AuthorID {
+						m.posts[i].AuthorName = m.client.CachedUsername(p.AuthorID)
+					}
+				}
+			}
+		}
+		if len(cmds) > 0 {
+			return m, tea.Batch(cmds...)
+		}
+		m.viewport.SetContent(m.renderPosts())
+		return m, nil
+
+	case client.UsernameMsg:
+		for i := range m.posts {
+			if m.posts[i].AuthorID == msg.AuthorID {
+				m.posts[i].AuthorName = msg.Username
+			}
+		}
+		m.viewport.SetContent(m.renderPosts())
 		return m, nil
 
 	case client.ErrMsg:
@@ -82,7 +113,7 @@ func (m ThreadModel) Update(msg tea.Msg) (ThreadModel, tea.Cmd) {
 
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case "escape":
+		case "esc":
 			return m, nil
 		case " ":
 			if !m.loading && m.page < m.totalPages {
@@ -108,17 +139,26 @@ func (m ThreadModel) View() tea.View {
 
 	var b strings.Builder
 
-	header := styles.TitleStyle.Render(m.topic.Title)
-	b.WriteString(header)
+	title := styles.TitleStyle.Render(m.topic.Title)
+	b.WriteString(title)
 	b.WriteString("\n")
 
-	info := fmt.Sprintf("  %s  %s  %s",
-		styles.DealerStyle.Render(m.topic.DealerName()),
+	var metaParts []string
+	if m.topic.DealerName() != "" {
+		metaParts = append(metaParts, styles.DealerStyle.Render(m.topic.DealerName()))
+	}
+	metaParts = append(metaParts,
 		styles.ViewsStyle.Render(fmt.Sprintf("%d views", m.topic.TotalViews)),
-		styles.RepliesStyle.Render(fmt.Sprintf("%d replies", m.topic.TotalViews)),
+		styles.RepliesStyle.Render(fmt.Sprintf("%d replies", m.topic.TotalReplies)),
 	)
-	b.WriteString(info)
-	b.WriteString("\n\n")
+	sep := " " + styles.SeparatorStyle.Render("·") + " "
+	meta := "  " + strings.Join(metaParts, sep)
+	b.WriteString(meta)
+	b.WriteString("\n")
+
+	divider := strings.Repeat("─", min(m.width, 80))
+	b.WriteString(styles.SeparatorStyle.Render(divider))
+	b.WriteString("\n")
 
 	b.WriteString(m.viewport.View())
 
@@ -136,32 +176,47 @@ func (m ThreadModel) renderPosts() string {
 
 	for i, p := range m.posts {
 		if i > 0 {
+			b.WriteString(styles.DividerStyle.Render("  · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·"))
 			b.WriteString("\n")
-			b.WriteString(strings.Repeat("─", min(m.width, 80)))
-			b.WriteString("\n\n")
 		}
 
-		voteStr := ""
-		if p.Votes.TotalUp > 0 || p.Votes.TotalDown > 0 {
-			voteStr = fmt.Sprintf("  ↑%d↓%d", p.Votes.TotalUp, p.Votes.TotalDown)
-		}
-
-		header := fmt.Sprintf("#%d · user_%d · %s%s",
-			p.Number,
-			p.AuthorID,
-			relativeAge(p.PostTime),
-			voteStr,
-		)
-		b.WriteString(styles.ViewsStyle.Render(header))
-		b.WriteString("\n\n")
+		header := m.renderPostHeader(p)
+		b.WriteString("  ")
+		b.WriteString(header)
+		b.WriteString("\n")
 
 		body := stripHTML(p.Body)
 		body = wrapText(body, m.width-4)
-		b.WriteString(body)
-		b.WriteString("\n")
+
+		for _, line := range strings.Split(body, "\n") {
+			b.WriteString("    ")
+			b.WriteString(line)
+			b.WriteString("\n")
+		}
 	}
 
 	return b.String()
+}
+
+func (m ThreadModel) renderPostHeader(p types.Post) string {
+	numStr := styles.PostHeaderStyle.Render(fmt.Sprintf("%2d.", p.Number))
+	name := p.AuthorName
+	if name == "" {
+		name = fmt.Sprintf("user_%d", p.AuthorID)
+	}
+	authorStr := styles.PostUserStyle.Render(name)
+	ageStr := styles.AgeStyle.Render(relativeAge(p.PostTime))
+
+	parts := []string{numStr, authorStr, ageStr}
+
+	if p.Votes.TotalUp > 0 || p.Votes.TotalDown > 0 {
+		upStr := styles.PostUpvoteStyle.Render(fmt.Sprintf("↑%d", p.Votes.TotalUp))
+		downStr := styles.PostDownvoteStyle.Render(fmt.Sprintf("↓%d", p.Votes.TotalDown))
+		parts = append(parts, upStr, downStr)
+	}
+
+	sep := " " + styles.SeparatorStyle.Render("·") + " "
+	return strings.Join(parts, sep)
 }
 
 var (

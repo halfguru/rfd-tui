@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -13,7 +14,9 @@ import (
 const baseURL = "https://forums.redflagdeals.com"
 
 type Client struct {
-	http *http.Client
+	http      *http.Client
+	userCache map[int]string
+	mu        sync.RWMutex
 }
 
 func New() *Client {
@@ -21,7 +24,13 @@ func New() *Client {
 		http: &http.Client{
 			Timeout: 15 * time.Second,
 		},
+		userCache: make(map[int]string),
 	}
+}
+
+type UsernameMsg struct {
+	AuthorID int
+	Username string
 }
 
 type TopicsMsg struct {
@@ -69,6 +78,37 @@ func (c *Client) FetchPosts(topicID, page int) tea.Cmd {
 			return PostsMsg{Posts: result.Posts, Page: result.Pager.Page, Pager: result.Pager}
 		})
 	}
+}
+
+func (c *Client) FetchUsername(authorID int) tea.Cmd {
+	return func() tea.Msg {
+		c.mu.RLock()
+		name, ok := c.userCache[authorID]
+		c.mu.RUnlock()
+		if ok {
+			return UsernameMsg{AuthorID: authorID, Username: name}
+		}
+		url := fmt.Sprintf("%s/api/users/%d", baseURL, authorID)
+		return c.doGet(url, func(body json.Decoder) tea.Msg {
+			var result types.UserResponse
+			if err := body.Decode(&result); err != nil {
+				return UsernameMsg{AuthorID: authorID, Username: fmt.Sprintf("user_%d", authorID)}
+			}
+			c.mu.Lock()
+			c.userCache[authorID] = result.User.Username
+			c.mu.Unlock()
+			return UsernameMsg{AuthorID: authorID, Username: result.User.Username}
+		})
+	}
+}
+
+func (c *Client) CachedUsername(authorID int) string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if name, ok := c.userCache[authorID]; ok {
+		return name
+	}
+	return fmt.Sprintf("user_%d", authorID)
 }
 
 func (c *Client) doGet(url string, handler func(json.Decoder) tea.Msg) tea.Msg {
