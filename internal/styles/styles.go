@@ -85,7 +85,7 @@ var (
 			Foreground(lipgloss.Color("#444444"))
 
 	PostHeaderStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("#9a918a"))
+			Foreground(lipgloss.Color("#9a918a"))
 
 	PostUserStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#e0e0e0")).Bold(true)
@@ -100,7 +100,7 @@ var (
 			Foreground(lipgloss.Color("#4caf50")).Bold(true)
 
 	PostDownvoteStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#ef5350")).Bold(true)
+				Foreground(lipgloss.Color("#ef5350")).Bold(true)
 
 	SearchPromptStyle = lipgloss.NewStyle().
 				Foreground(lipgloss.Color("#ff6600")).Bold(true)

@@ -135,7 +135,7 @@ func (m ThreadModel) Update(msg tea.Msg) (ThreadModel, tea.Cmd) {
 func (m ThreadModel) View() tea.View {
 	if m.loading && len(m.posts) == 0 {
 		var b strings.Builder
-		b.WriteString(fmt.Sprintf("\n  %s Loading thread...\n\n", m.spinner.View()))
+		fmt.Fprintf(&b, "\n  %s Loading thread...\n\n", m.spinner.View())
 		for i := 0; i < 5; i++ {
 			b.WriteString("  ")
 			b.WriteString(renderThreadShimmer(m.width - 4))

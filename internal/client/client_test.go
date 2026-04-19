@@ -23,7 +23,9 @@ func TestFetchTopics(t *testing.T) {
 			t.Errorf("expected forum_id=9, got %s", r.URL.Query().Get("forum_id"))
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Fatal(err)
+		}
 	}))
 	defer srv.Close()
 
@@ -53,7 +55,9 @@ func TestFetchPosts(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Fatal(err)
+		}
 	}))
 	defer srv.Close()
 
@@ -83,7 +87,9 @@ func TestRetryOnServerError(t *testing.T) {
 			Pager:  types.Pager{Page: 1},
 			Topics: []types.Topic{{TopicID: 1}},
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Fatal(err)
+		}
 	}))
 	defer srv.Close()
 

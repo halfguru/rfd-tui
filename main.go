@@ -12,6 +12,9 @@ var (
 	version = "dev"
 	commit  = "none"
 	date    = "unknown"
+	_       = version
+	_       = commit
+	_       = date
 )
 
 func main() {

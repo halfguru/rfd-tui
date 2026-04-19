@@ -253,7 +253,7 @@ func (m DealListModel) View() tea.View {
 	if m.loading {
 		var b strings.Builder
 		b.WriteString("\n")
-		b.WriteString(fmt.Sprintf("  %s Loading deals...\n\n", m.spinner.View()))
+		fmt.Fprintf(&b, "  %s Loading deals...\n\n", m.spinner.View())
 		for i := 0; i < 5; i++ {
 			b.WriteString("  ")
 			b.WriteString(renderShimmer(m.width - 4))

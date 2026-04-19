@@ -145,7 +145,6 @@ func (c *Client) doGetWithRetry(ctx context.Context, url string, handler func(js
 			}
 		}
 
-		lastErr = nil
 		msg := c.doGet(ctx, url, handler)
 		if _, ok := msg.(ErrMsg); !ok {
 			return msg

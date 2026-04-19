@@ -60,8 +60,12 @@ func TestLoadInvalidYAML(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("HOME", dir)
 	cfgDir := filepath.Join(dir, ".config", "rfdtui")
-	os.MkdirAll(cfgDir, 0o755)
-	os.WriteFile(filepath.Join(cfgDir, "config.yaml"), []byte(":\tinvalid"), 0o644)
+	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(cfgDir, "config.yaml"), []byte(":\tinvalid"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	_, err := Load()
 	if err == nil {
