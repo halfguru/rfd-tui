@@ -52,14 +52,14 @@ type PostsResponse struct {
 }
 
 type Post struct {
-	PostID    int       `json:"post_id"`
-	TopicID   int       `json:"topic_id"`
-	AuthorID  int       `json:"author_id"`
-	Number    int       `json:"number"`
-	Body      string    `json:"body"`
-	PostTime  time.Time `json:"post_time"`
-	Title     string    `json:"title"`
-	Votes     PostVotes `json:"votes"`
+	PostID     int       `json:"post_id"`
+	TopicID    int       `json:"topic_id"`
+	AuthorID   int       `json:"author_id"`
+	Number     int       `json:"number"`
+	Body       string    `json:"body"`
+	PostTime   time.Time `json:"post_time"`
+	Title      string    `json:"title"`
+	Votes      PostVotes `json:"votes"`
 	AuthorName string
 }
 

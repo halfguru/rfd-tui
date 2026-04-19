@@ -6,10 +6,10 @@ A beautiful terminal UI for browsing [RedFlagDeals.com](https://forums.redflagde
 
 Built with Go + [Bubble Tea v2](https://charm.land)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/simon/rfd)](https://goreportcard.com/report/github.com/simon/rfd)
-[![Go Reference](https://pkg.go.dev/badge/github.com/simon/rfd.svg)](https://pkg.go.dev/github.com/simon/rfd)
+[![CI](https://github.com/simon/rfdtui/actions/workflows/ci.yml/badge.svg)](https://github.com/simon/rfdtui/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/simon/rfdtui)](https://goreportcard.com/report/github.com/simon/rfdtui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?style=flat&logo=go)](https://go.dev)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go)](https://go.dev)
 
 ![demo](docs/demo.gif)
 
@@ -20,40 +20,64 @@ Built with Go + [Bubble Tea v2](https://charm.land)
 ## ✨ Features
 
 - **Browse Hot Deals** — scores, prices, dealer info, and savings at a glance
-- **Read Threads** — full post content with vote counts
+- **Hot Badge** — trending deals (score ≥ 25) highlighted with a `HOT` badge
+- **Read Threads** — full post content with vote counts and user avatars
 - **Search** — filter deals by text or regex
 - **Sort & Filter** — by score, views, or minimum score threshold
-- **Open in Browser** — jump to any deal with `o`
+- **Open in Browser** — jump to any deal with `o` (works in deal list and thread views)
+- **Copy to Clipboard** — copy deal URL with `c`
+- **Mouse Support** — click to navigate, scroll to move
+- **Config File** — customize behavior via `~/.config/rfd-tui/config.yaml`
+- **Scroll Indicator** — visual position marker in deal list
+- **Loading Shimmer** — skeleton placeholders while loading
+- **Alt Screen** — fullscreen terminal mode (configurable)
 - **Vim-style Keybindings** — `j`/`k`, `Enter`, `/`, `q`, and more
 
 ## 📦 Install
 
+### From Source
+
 ```bash
-git clone https://github.com/simon/rfd.git
-cd rfd
-go build -o rfd .
+git clone https://github.com/simon/rfdtui.git
+cd rfdtui
+go build -o rfdtui .
 ```
+
+### From Release
+
+Download the latest binary from [Releases](https://github.com/simon/rfdtui/releases).
 
 ## 🚀 Usage
 
 ```bash
-./rfd
+./rfdtui
 ```
 
 ### Keybindings
 
-| Key        | Action                  |
-| ---------- | ----------------------- |
-| `j` / `k`  | Navigate up / down      |
-| `Enter`    | Open thread             |
-| `o`        | Open deal in browser    |
-| `/`        | Search                  |
-| `s`        | Cycle sort mode         |
-| `f`        | Cycle min score filter  |
-| `n` / `p`  | Next / previous page    |
-| `Space`    | Load more posts         |
-| `Esc` / `q`| Back / Quit             |
-| `?`        | Help                    |
+| Key          | Action                  |
+| ------------ | ----------------------- |
+| `j` / `k`    | Navigate up / down      |
+| `Enter`      | Open thread             |
+| `o`          | Open deal in browser    |
+| `c`          | Copy deal URL           |
+| `/`          | Search                  |
+| `s`          | Cycle sort mode         |
+| `f`          | Cycle min score filter  |
+| `n` / `p`    | Next / previous page    |
+| `Space`      | Load more posts         |
+| `Esc` / `q`  | Back / Quit             |
+| `?`          | Help                    |
+
+### Configuration
+
+Create `~/.config/rfdtui/config.yaml` (see `config.example.yaml`):
+
+```yaml
+mouse: true
+alt_screen: true
+theme: default
+```
 
 ## 🛠 Tech Stack
 

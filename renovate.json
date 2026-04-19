@@ -10,5 +10,15 @@
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 5am on Monday"]
-  }
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ]
 }

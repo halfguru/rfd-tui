@@ -10,9 +10,9 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
-	"github.com/simon/rfd/internal/client"
-	"github.com/simon/rfd/internal/styles"
-	"github.com/simon/rfd/internal/types"
+	"github.com/simon/rfdtui/internal/client"
+	"github.com/simon/rfdtui/internal/styles"
+	"github.com/simon/rfdtui/internal/types"
 )
 
 type sortMode int
@@ -251,7 +251,15 @@ func (m *DealListModel) filterWithRegex(topics []types.Topic, re *regexp.Regexp)
 
 func (m DealListModel) View() tea.View {
 	if m.loading {
-		return tea.NewView(fmt.Sprintf("\n  %s Loading deals...", m.spinner.View()))
+		var b strings.Builder
+		b.WriteString("\n")
+		fmt.Fprintf(&b, "  %s Loading deals...\n\n", m.spinner.View())
+		for i := 0; i < 5; i++ {
+			b.WriteString("  ")
+			b.WriteString(renderShimmer(m.width - 4))
+			b.WriteString("\n")
+		}
+		return tea.NewView(b.String())
 	}
 
 	if m.err != nil {
@@ -333,8 +341,10 @@ func (m DealListModel) View() tea.View {
 		b.WriteString(m.renderStatusBar(topics))
 		b.WriteString("\n")
 
-		help := " j/k:nav  Enter:open  /:search  s:sort  f:filter  n/p:page  o:browser  ?:help  q:quit"
+		scroll := renderScrollBar(m.cursor, len(topics), m.height)
+		help := " j/k:nav  Enter:open  /:search  s:sort  f:filter  n/p:page  o:browser  c:copy  ?:help  q:quit"
 		b.WriteString(styles.HelpStyle.Render(help))
+		b.WriteString(scroll)
 	}
 
 	return tea.NewView(b.String())
@@ -365,6 +375,10 @@ func (m DealListModel) renderStatusBar(topics []types.Topic) string {
 	return styles.StatusBarStyle.Render(status)
 }
 
+func (m DealListModel) SearchActive() bool {
+	return m.searchActive
+}
+
 func (m DealListModel) SelectedTopic() *types.Topic {
 	topics := m.filteredTopics
 	if topics == nil {
@@ -382,7 +396,13 @@ func formatDealCard(t types.Topic, width int) (string, string) {
 	if maxTitleWidth > 0 && len(title) > maxTitleWidth {
 		title = title[:maxTitleWidth-1] + "…"
 	}
-	titleLine := styles.TitleLineStyle.Render(title)
+
+	var titleParts []string
+	if t.Score >= 25 {
+		titleParts = append(titleParts, styles.HotBadgeStyle.Render("HOT"))
+	}
+	titleParts = append(titleParts, styles.TitleLineStyle.Render(title))
+	titleLine := strings.Join(titleParts, " ")
 
 	scoreStr := fmt.Sprintf("%+d", t.Score)
 	scoreBadge := styles.ScoreBadge(t.Score).Render(scoreStr)
@@ -421,47 +441,6 @@ func formatDealCard(t types.Topic, width int) (string, string) {
 	return titleLine, metaLine
 }
 
-func formatDealLine(t types.Topic, width int) string {
-	scoreStr := fmt.Sprintf("%+d", t.Score)
-	score := styles.ScoreStyle(t.Score).Render(scoreStr)
-
-	dealer := ""
-	if t.DealerName() != "" {
-		dealer = styles.DealerStyle.Render(t.DealerName())
-	}
-
-	views := styles.ViewsStyle.Render(fmt.Sprintf("%d views", t.TotalViews))
-	replies := styles.RepliesStyle.Render(fmt.Sprintf("%d replies", t.TotalReplies))
-	age := styles.AgeStyle.Render(relativeAge(t.PostTime))
-
-	price := ""
-	if t.Price() != "" {
-		price = styles.PriceStyle.Render(t.Price())
-	}
-	if t.Savings() != "" && price != "" {
-		price += styles.PriceStyle.Render(fmt.Sprintf(" (%s off)", t.Savings()))
-	}
-
-	title := t.Title
-	if width > 0 {
-		maxTitleWidth := width - 40
-		if maxTitleWidth > 0 && len(title) > maxTitleWidth {
-			title = title[:maxTitleWidth-1] + "…"
-		}
-	}
-
-	parts := []string{score, title}
-	if dealer != "" {
-		parts = append(parts, dealer)
-	}
-	if price != "" {
-		parts = append(parts, price)
-	}
-	parts = append(parts, views, replies, age)
-
-	return strings.Join(parts, "  ")
-}
-
 func relativeAge(t time.Time) string {
 	d := time.Since(t)
 	switch {
@@ -476,4 +455,35 @@ func relativeAge(t time.Time) string {
 	default:
 		return fmt.Sprintf("%dd ago", int(d.Hours()/24))
 	}
+}
+
+func renderScrollBar(cursor, total, height int) string {
+	if total <= 0 {
+		return ""
+	}
+	trackLen := 10
+	pos := (cursor * trackLen) / total
+	if pos >= trackLen {
+		pos = trackLen - 1
+	}
+
+	track := make([]rune, trackLen)
+	for i := range track {
+		track[i] = '·'
+	}
+	track[pos] = '▌'
+
+	return "  " + styles.ScrollTrackStyle.Render(string(track))
+}
+
+func renderShimmer(width int) string {
+	if width <= 0 {
+		width = 60
+	}
+	line1 := strings.Repeat("━", width*2/3) + strings.Repeat(" ", width-width*2/3)
+	line2 := strings.Repeat("━", width/3) + strings.Repeat(" ", width-width/3)
+	line3 := strings.Repeat("━", width/2) + strings.Repeat(" ", width-width/2)
+	return styles.ShimmerStyle.Render(line1) + "\n" +
+		styles.ShimmerHighlightStyle.Render(line2) + "\n" +
+		styles.ShimmerStyle.Render(line3)
 }

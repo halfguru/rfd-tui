@@ -6,8 +6,10 @@ import (
 	"runtime"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/simon/rfd/internal/client"
-	"github.com/simon/rfd/internal/views"
+	"github.com/atotto/clipboard"
+	"github.com/simon/rfdtui/internal/client"
+	"github.com/simon/rfdtui/internal/config"
+	"github.com/simon/rfdtui/internal/views"
 )
 
 type activeView int
@@ -24,16 +26,21 @@ type Model struct {
 	help       views.HelpModel
 	showHelp   bool
 	client     *client.Client
+	config     config.Config
 	width      int
 	height     int
+	altScreen  bool
+	statusMsg  string
 }
 
-func NewModel() Model {
+func NewModel(cfg config.Config) Model {
 	c := client.New()
 	return Model{
 		activeView: viewDealList,
 		dealList:   views.NewDealList(c),
 		client:     c,
+		config:     cfg,
+		altScreen:  cfg.AltScreen,
 	}
 }
 
@@ -54,6 +61,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
+		if m.activeView == viewDealList && m.dealList.SearchActive() {
+			var cmd tea.Cmd
+			m.dealList, cmd = m.dealList.Update(msg)
+			return m, cmd
+		}
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
@@ -71,11 +83,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.activeView = viewDealList
 			m.thread = views.ThreadModel{}
+			m.statusMsg = ""
 			return m, nil
 		case "esc":
 			if m.activeView == viewThread {
 				m.activeView = viewDealList
 				m.thread = views.ThreadModel{}
+				m.statusMsg = ""
 				return m, nil
 			}
 			return m, tea.Quit
@@ -84,17 +98,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if t := m.dealList.SelectedTopic(); t != nil {
 					m.activeView = viewThread
 					m.thread = views.NewThread(t, m.client, m.width, m.height)
+					m.statusMsg = ""
 					return m, m.thread.Init()
 				}
 				return m, nil
 			}
 		case "o":
-			if m.activeView == viewDealList {
-				if t := m.dealList.SelectedTopic(); t != nil {
-					return m, openBrowser(t.DealURL())
-				}
+			url := m.currentDealURL()
+			if url != "" {
+				return m, openBrowser(url)
 			}
+		case "c":
+			url := m.currentDealURL()
+			if url != "" {
+				return m, copyToClipboard(url)
+			}
+		case "ctrl+a":
+			m.altScreen = !m.altScreen
+			return m, nil
 		}
+	case clipboardMsg:
+		m.statusMsg = "Copied to clipboard"
+		return m, nil
+	case client.ErrMsg:
+		m.statusMsg = fmt.Sprintf("Error: %v", msg.Err)
 	}
 
 	var cmd tea.Cmd
@@ -105,6 +132,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.thread, cmd = m.thread.Update(msg)
 	}
 	return m, cmd
+}
+
+func (m Model) currentDealURL() string {
+	switch m.activeView {
+	case viewDealList:
+		if t := m.dealList.SelectedTopic(); t != nil {
+			return t.DealURL()
+		}
+	case viewThread:
+		if m.thread.Topic() != nil {
+			return m.thread.Topic().DealURL()
+		}
+	}
+	return ""
 }
 
 func (m Model) updateHelp(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -130,7 +171,21 @@ func (m Model) View() tea.View {
 	if m.showHelp {
 		return m.help.View()
 	}
+
+	v.AltScreen = m.altScreen
+	if m.config.Mouse {
+		v.MouseMode = tea.MouseModeCellMotion
+	}
 	return v
+}
+
+type clipboardMsg struct{}
+
+func copyToClipboard(text string) tea.Cmd {
+	return func() tea.Msg {
+		_ = clipboard.WriteAll(text)
+		return clipboardMsg{}
+	}
 }
 
 func openBrowser(url string) tea.Cmd {

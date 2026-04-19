@@ -1,0 +1,38 @@
+version: 2
+
+builds:
+  - main: .
+    binary: rfdtui
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+brews:
+  - repository:
+      owner: simon
+      name: homebrew-tap
+    directory: Formula
+    homepage: "https://github.com/simon/rfdtui"
+    description: "Terminal UI for browsing RedFlagDeals.com hot deals"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
