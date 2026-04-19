@@ -1,4 +1,4 @@
-module github.com/simon/rfdtui
+module github.com/halfguru/rfd-tui
 
 go 1.26
 

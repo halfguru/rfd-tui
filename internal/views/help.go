@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/simon/rfdtui/internal/styles"
+	"github.com/halfguru/rfd-tui/internal/styles"
 )
 
 type HelpModel struct {

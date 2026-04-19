@@ -6,8 +6,8 @@ A beautiful terminal UI for browsing [RedFlagDeals.com](https://forums.redflagde
 
 Built with Go + [Bubble Tea v2](https://charm.land)
 
-[![CI](https://github.com/simon/rfdtui/actions/workflows/ci.yml/badge.svg)](https://github.com/simon/rfdtui/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/simon/rfdtui)](https://goreportcard.com/report/github.com/simon/rfdtui)
+[![CI](https://github.com/halfguru/rfd-tui/actions/workflows/ci.yml/badge.svg)](https://github.com/halfguru/rfd-tui/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/halfguru/rfd-tui)](https://goreportcard.com/report/github.com/halfguru/rfd-tui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go)](https://go.dev)
 
@@ -38,18 +38,20 @@ Built with Go + [Bubble Tea v2](https://charm.land)
 ### From Source
 
 ```bash
-git clone https://github.com/simon/rfdtui.git
-cd rfdtui
-go build -o rfdtui .
+git clone https://github.com/halfguru/rfd-tui.git
+cd rfd-tui
+task build
 ```
 
 ### From Release
 
-Download the latest binary from [Releases](https://github.com/simon/rfdtui/releases).
+Download the latest binary from [Releases](https://github.com/halfguru/rfd-tui/releases).
 
 ## 🚀 Usage
 
 ```bash
+task run
+# or
 ./rfdtui
 ```
 

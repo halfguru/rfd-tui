@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -41,6 +42,7 @@ func Load() (Config, error) {
 	data, err := os.ReadFile(p)
 	if err != nil {
 		if os.IsNotExist(err) {
+			slog.Debug("no config file found, using defaults", "path", p)
 			return cfg, nil
 		}
 		return cfg, fmt.Errorf("reading config: %w", err)
@@ -49,6 +51,8 @@ func Load() (Config, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return cfg, fmt.Errorf("parsing config: %w", err)
 	}
+
+	slog.Info("loaded config", "path", p, "mouse", cfg.Mouse, "alt_screen", cfg.AltScreen, "theme", cfg.Theme)
 
 	return cfg, nil
 }

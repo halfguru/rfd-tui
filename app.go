@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"runtime"
 
 	tea "charm.land/bubbletea/v2"
 	"github.com/atotto/clipboard"
-	"github.com/simon/rfdtui/internal/client"
-	"github.com/simon/rfdtui/internal/config"
-	"github.com/simon/rfdtui/internal/views"
+	"github.com/halfguru/rfd-tui/internal/client"
+	"github.com/halfguru/rfd-tui/internal/config"
+	"github.com/halfguru/rfd-tui/internal/views"
 )
 
 type activeView int
@@ -190,6 +191,7 @@ func copyToClipboard(text string) tea.Cmd {
 
 func openBrowser(url string) tea.Cmd {
 	return func() tea.Msg {
+		slog.Info("opening browser", "url", url)
 		var cmd *exec.Cmd
 		switch runtime.GOOS {
 		case "darwin":
@@ -200,6 +202,7 @@ func openBrowser(url string) tea.Cmd {
 			return client.ErrMsg{Err: fmt.Errorf("unsupported platform")}
 		}
 		if err := cmd.Start(); err != nil {
+			slog.Error("failed to open browser", "url", url, "error", err)
 			return client.ErrMsg{Err: fmt.Errorf("failed to open browser: %w", err)}
 		}
 		return nil

@@ -10,21 +10,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.26"
-      - run: go build -o rfdtui .
-      - run: go vet ./...
-      - run: go test ./...
+      - name: Install task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+      - run: task build
+      - run: task vet
+      - run: task test
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.26"
-      - uses: golangci/golangci-lint-action@v9
+      - name: Install task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+      - uses: golangci/golangci-lint-action@v7
         with:
           version: latest
+      - run: task lint

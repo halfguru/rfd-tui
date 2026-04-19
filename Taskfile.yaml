@@ -1,0 +1,65 @@
+# https://taskfile.dev
+
+version: "3"
+silent: true
+
+tasks:
+  default:
+    cmds:
+      - go run . {{.CLI_ARGS}}
+    interactive: true
+    desc: Run the app
+
+  build:
+    cmds:
+      - go build -o rfdtui .
+    desc: Build binary
+
+  run:
+    cmds:
+      - task: build
+      - ./rfdtui
+    interactive: true
+    desc: Build and run
+
+  test:
+    cmds:
+      - go test ./... {{.CLI_ARGS}}
+    desc: Run tests
+
+  vet:
+    cmds:
+      - go vet ./...
+    desc: Run go vet
+
+  lint:
+    cmds:
+      - golangci-lint run --timeout=5m
+    desc: Run linters
+
+  lint:fix:
+    cmds:
+      - golangci-lint run --timeout=5m --fix
+    desc: Run linters and fix issues
+
+  fmt:
+    cmds:
+      - gofumpt -w $(git ls-files '*.go')
+    desc: Format Go files
+
+  tidy:
+    cmds:
+      - go mod tidy
+    desc: Tidy go modules
+
+  demo:
+    cmds:
+      - vhs demo.tape
+    desc: Regenerate demo GIF
+
+  check:
+    cmds:
+      - task: vet
+      - task: lint
+      - task: test
+    desc: Run all checks (vet + lint + test)
