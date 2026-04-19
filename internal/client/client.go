@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"net/http"
 	"sync"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/simon/rfdtui/internal/types"
+	"github.com/halfguru/rfd-tui/internal/types"
 )
 
 const defaultBaseURL = "https://forums.redflagdeals.com"
@@ -119,6 +120,7 @@ func (c *Client) FetchUsername(authorID int) tea.Cmd {
 			c.mu.Lock()
 			c.userCache[authorID] = result.User.Username
 			c.mu.Unlock()
+			slog.Debug("fetched username", "author_id", authorID, "username", result.User.Username)
 			return UsernameMsg{AuthorID: authorID, Username: result.User.Username}
 		})
 	}
@@ -138,6 +140,7 @@ func (c *Client) doGetWithRetry(ctx context.Context, url string, handler func(js
 	for attempt := range maxRetries {
 		if attempt > 0 {
 			delay := backoff(attempt)
+			slog.Warn("retrying request", "url", url, "attempt", attempt+1, "delay", delay)
 			select {
 			case <-ctx.Done():
 				return ErrMsg{Err: ctx.Err()}
@@ -151,10 +154,12 @@ func (c *Client) doGetWithRetry(ctx context.Context, url string, handler func(js
 		}
 		lastErr = msg.(ErrMsg).Err
 	}
+	slog.Error("request failed after retries", "url", url, "retries", maxRetries, "error", lastErr)
 	return ErrMsg{Err: fmt.Errorf("after %d retries: %w", maxRetries, lastErr)}
 }
 
 func (c *Client) doGet(ctx context.Context, url string, handler func(json.Decoder) tea.Msg) tea.Msg {
+	start := time.Now()
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return ErrMsg{Err: err}
@@ -163,9 +168,12 @@ func (c *Client) doGet(ctx context.Context, url string, handler func(json.Decode
 
 	resp, err := c.http.Do(req)
 	if err != nil {
+		slog.Error("request failed", "url", url, "error", err)
 		return ErrMsg{Err: err}
 	}
 	defer func() { _ = resp.Body.Close() }()
+
+	slog.Debug("request completed", "url", url, "status", resp.StatusCode, "duration", time.Since(start))
 
 	if resp.StatusCode == http.StatusTooManyRequests {
 		return ErrMsg{Err: fmt.Errorf("rate limited (429)")}

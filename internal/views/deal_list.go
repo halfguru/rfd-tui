@@ -10,9 +10,9 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
-	"github.com/simon/rfdtui/internal/client"
-	"github.com/simon/rfdtui/internal/styles"
-	"github.com/simon/rfdtui/internal/types"
+	"github.com/halfguru/rfd-tui/internal/client"
+	"github.com/halfguru/rfd-tui/internal/styles"
+	"github.com/halfguru/rfd-tui/internal/types"
 )
 
 type sortMode int

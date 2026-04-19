@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/simon/rfdtui/internal/types"
+	"github.com/halfguru/rfd-tui/internal/types"
 )
 
 func TestFetchTopics(t *testing.T) {

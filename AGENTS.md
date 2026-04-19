@@ -11,6 +11,7 @@ A terminal UI for browsing RedFlagDeals.com hot deals, built with Go + Bubble Te
 - **Styling**: Lipgloss v2 (`charm.land/lipgloss/v2`)
 - **Components**: Bubbles v2 (`charm.land/bubbles/v2`)
 - **Config**: YAML via `gopkg.in/yaml.v3`
+- **Task Runner**: [Taskfile](https://taskfile.dev) — use `task` commands for all build/lint/test
 - **CRITICAL**: These are v2 import paths. Do NOT use `github.com/charmbracelet/*` v1 paths.
   - `View()` method returns `tea.View` (not `string`)
   - Key messages are `tea.KeyPressMsg` (not `tea.KeyMsg`)
