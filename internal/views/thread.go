@@ -9,9 +9,9 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
-	"github.com/simon/rfd/internal/client"
-	"github.com/simon/rfd/internal/styles"
-	"github.com/simon/rfd/internal/types"
+	"github.com/simon/rfdtui/internal/client"
+	"github.com/simon/rfdtui/internal/styles"
+	"github.com/simon/rfdtui/internal/types"
 )
 
 type ThreadModel struct {
@@ -49,6 +49,10 @@ func NewThread(topic *types.Topic, c *client.Client, w, h int) ThreadModel {
 		width:    w,
 		height:   h,
 	}
+}
+
+func (m ThreadModel) Topic() *types.Topic {
+	return m.topic
 }
 
 func (m ThreadModel) Init() tea.Cmd {
@@ -130,7 +134,14 @@ func (m ThreadModel) Update(msg tea.Msg) (ThreadModel, tea.Cmd) {
 
 func (m ThreadModel) View() tea.View {
 	if m.loading && len(m.posts) == 0 {
-		return tea.NewView(fmt.Sprintf("\n  %s Loading thread...", m.spinner.View()))
+		var b strings.Builder
+		b.WriteString(fmt.Sprintf("\n  %s Loading thread...\n\n", m.spinner.View()))
+		for i := 0; i < 5; i++ {
+			b.WriteString("  ")
+			b.WriteString(renderThreadShimmer(m.width - 4))
+			b.WriteString("\n")
+		}
+		return tea.NewView(b.String())
 	}
 
 	if m.err != nil && len(m.posts) == 0 {
@@ -186,9 +197,15 @@ func (m ThreadModel) renderPosts() string {
 		b.WriteString("\n")
 
 		body := stripHTML(p.Body)
+		body = collapseNewlines(body)
 		body = wrapText(body, m.width-4)
+		body = strings.TrimRight(body, "\n")
 
 		for _, line := range strings.Split(body, "\n") {
+			if strings.TrimSpace(line) == "" {
+				b.WriteString("\n")
+				continue
+			}
 			b.WriteString("    ")
 			b.WriteString(line)
 			b.WriteString("\n")
@@ -220,11 +237,12 @@ func (m ThreadModel) renderPostHeader(p types.Post) string {
 }
 
 var (
-	brRe      = regexp.MustCompile(`<br\s*/?>`)
-	htmlTagRe = regexp.MustCompile(`<[^>]+>`)
-	quoteRe   = regexp.MustCompile(`&quot;`)
-	ampRe     = regexp.MustCompile(`&amp;`)
-	nbspRe    = regexp.MustCompile(`&nbsp;`)
+	brRe           = regexp.MustCompile(`<br\s*/?>`)
+	htmlTagRe      = regexp.MustCompile(`<[^>]+>`)
+	quoteRe        = regexp.MustCompile(`&quot;`)
+	ampRe          = regexp.MustCompile(`&amp;`)
+	nbspRe         = regexp.MustCompile(`&nbsp;`)
+	multiNewlineRe = regexp.MustCompile(`\n{3,}`)
 )
 
 func stripHTML(s string) string {
@@ -235,6 +253,10 @@ func stripHTML(s string) string {
 	s = nbspRe.ReplaceAllString(s, " ")
 	s = html.UnescapeString(s)
 	return strings.TrimSpace(s)
+}
+
+func collapseNewlines(s string) string {
+	return multiNewlineRe.ReplaceAllString(s, "\n\n")
 }
 
 func wrapText(s string, width int) string {
@@ -266,9 +288,10 @@ func wrapText(s string, width int) string {
 	return b.String()
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
+func renderThreadShimmer(width int) string {
+	if width <= 0 {
+		width = 60
 	}
-	return b
+	line := strings.Repeat("━", width*2/3) + strings.Repeat(" ", width-width*2/3)
+	return styles.ShimmerStyle.Render(line)
 }

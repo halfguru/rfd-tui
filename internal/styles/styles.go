@@ -121,6 +121,23 @@ var (
 
 	SeparatorStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#5a534d"))
+
+	HotBadgeStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#ffffff")).
+			Background(lipgloss.Color("#ff4444")).
+			Padding(0, 1).Bold(true)
+
+	ScrollBarStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#ff6600"))
+
+	ScrollTrackStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#333333"))
+
+	ShimmerStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#444444"))
+
+	ShimmerHighlightStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("#666666"))
 )
 
 var CategoryTagStyles = map[int]lipgloss.Style{

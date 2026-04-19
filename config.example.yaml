@@ -1,0 +1,10 @@
+# rfdtui config — place at ~/.config/rfdtui/config.yaml
+
+# Enable mouse support
+mouse: true
+
+# Use alternate screen buffer (fullscreen mode)
+alt_screen: true
+
+# Color theme: default
+theme: default
